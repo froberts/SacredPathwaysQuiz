@@ -1,0 +1,11 @@
+{
+  "name": "sacred-pathways-quiz",
+  "version": "1.0.0",
+  "description": "Sacred Pathways Assessment - Discover your spiritual temperament",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

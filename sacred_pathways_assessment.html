@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sacred Pathways Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --surface-2: #f4f3f0;
+    --text-primary: #1a1917;
+    --text-secondary: #5c5a55;
+    --text-muted: #999790;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --accent: #2a78d6;
+    --accent-bg: #e8f1fc;
+    --accent-text: #185fa5;
+    --accent-border: #b5d4f4;
+    --on-accent: #ffffff;
+    --radius: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131312;
+      --surface: #1e1d1b;
+      --surface-2: #252422;
+      --text-primary: #f0ede8;
+      --text-secondary: #a8a49e;
+      --text-muted: #6e6c68;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.18);
+      --accent: #3987e5;
+      --accent-bg: #0c1e36;
+      --accent-text: #85b7eb;
+      --accent-border: #185fa5;
+      --on-accent: #ffffff;
+    }
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* INTRO */
+  #intro { text-align: center; padding: 3rem 1.5rem; }
+
+  .compass-ring {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 2rem;
+  }
+
+  .intro-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .intro-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .intro-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 420px;
+    margin: 0 auto 2rem;
+    line-height: 1.7;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--on-accent);
+    border: none;
+    border-radius: var(--radius);
+    padding: 13px 36px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .intro-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1rem;
+  }
+
+  /* QUESTION SCREEN */
+  #question-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem 1.75rem 1.5rem;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.75rem;
+  }
+
+  .progress-bar-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.35s ease;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .pathway-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    background: var(--accent-bg);
+    border: 0.5px solid var(--accent-border);
+    border-radius: var(--radius);
+    padding: 4px 10px;
+    margin-bottom: 1rem;
+  }
+
+  .question-number {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+  }
+
+  .scale-label-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .rating-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2rem;
+  }
+
+  .rating-btn {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .rating-btn:hover {
+    border-color: var(--accent-border);
+    color: var(--accent-text);
+    background: var(--accent-bg);
+  }
+  .rating-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 0.5px solid var(--border);
+    padding-top: 1.25rem;
+  }
+
+  .btn-ghost {
+    background: none;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 9px 22px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .btn-ghost:hover { background: var(--surface-2); }
+
+  .btn-next {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: none;
+    border-radius: var(--radius);
+    padding: 9px 26px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    opacity: 0.35;
+    pointer-events: none;
+    transition: opacity 0.15s;
+  }
+  .btn-next.enabled { opacity: 1; pointer-events: auto; }
+  .btn-next.enabled:hover { opacity: 0.88; }
+
+  /* RESULTS */
+  #results-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1.75rem;
+  }
+
+  .results-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 0.4rem;
+  }
+
+  .results-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 1.75rem;
+    line-height: 1.6;
+  }
+
+  .top-pathway-card {
+    background: var(--accent-bg);
+    border: 0.5px solid var(--accent-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .top-pathway-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+
+  .top-pathway-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+  }
+
+  .top-pathway-tagline {
+    font-size: 13px;
+    color: var(--accent-text);
+    margin-bottom: 0.75rem;
+    font-style: italic;
+  }
+
+  .top-pathway-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+  }
+
+  .chart-section-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .pathway-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 11px;
+  }
+
+  .pathway-bar-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    width: 112px;
+    flex-shrink: 0;
+  }
+
+  .pathway-bar-track {
+    flex: 1;
+    height: 9px;
+    background: var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .pathway-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.65s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  .pathway-bar-score {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .threshold-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 1.25rem;
+    line-height: 1.6;
+    border-top: 0.5px solid var(--border);
+    padding-top: 1rem;
+  }
+
+  .results-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-retake {
+    background: none;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .btn-retake:hover { background: var(--surface-2); }
+
+  .btn-print {
+    background: none;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .btn-print:hover { background: var(--surface-2); }
+
+  /* Share Results Section */
+  .share-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .share-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+
+  .share-btn {
+    display: inline-block;
+    background: none;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 10px 22px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.12s;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+  }
+  .share-btn:hover { background: var(--surface-2); }
+
+  .share-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1rem 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .share-divider::before,
+  .share-divider::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--border);
+  }
+
+  .share-custom {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .share-input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--text-primary);
+  }
+  .share-input::placeholder { color: var(--text-muted); }
+  .share-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .share-send-btn {
+    background: var(--accent);
+    color: var(--on-accent);
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .share-send-btn:hover { opacity: 0.88; }
+
+  /* Secondary pathways */
+  .secondary-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+  .secondary-card {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+  }
+  .secondary-card-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+  .secondary-card-score {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 1rem 0.75rem 3rem; }
+    #question-screen, #results-screen { padding: 1.25rem 1.25rem 1.25rem; }
+    .question-text { font-size: 17px; }
+    .intro-title { font-size: 28px; }
+    .secondary-cards { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    #app { max-width: 100%; }
+    .btn-retake, .btn-print, .share-section { display: none; }
+    #question-screen { display: none !important; }
+    #intro { display: none !important; }
+    #results-screen {
+      display: block !important;
+      border: none;
+      padding: 0;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="intro" class="screen active">
+    <div class="compass-ring">
+      <svg viewBox="0 0 88 88" width="88" height="88" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="44" cy="44" r="38" fill="none" stroke="var(--accent-border)" stroke-width="1.5"/>
+        <circle cx="44" cy="44" r="28" fill="none" stroke="var(--border)" stroke-width="1"/>
+        <circle cx="44" cy="44" r="5" fill="var(--accent)"/>
+        <line x1="44" y1="6" x2="44" y2="16" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"/>
+        <line x1="44" y1="72" x2="44" y2="82" stroke="var(--border-strong)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="6" y1="44" x2="16" y2="44" stroke="var(--border-strong)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="72" y1="44" x2="82" y2="44" stroke="var(--border-strong)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="17" y1="17" x2="24" y2="24" stroke="var(--border)" stroke-width="1" stroke-linecap="round"/>
+        <line x1="71" y1="17" x2="64" y2="24" stroke="var(--border)" stroke-width="1" stroke-linecap="round"/>
+        <line x1="17" y1="71" x2="24" y2="64" stroke="var(--border)" stroke-width="1" stroke-linecap="round"/>
+        <line x1="71" y1="71" x2="64" y2="64" stroke="var(--border)" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="intro-eyebrow">Gary Thomas · Sacred Pathways</p>
+    <h1 class="intro-title">How do you draw<br>near to God?</h1>
+    <p class="intro-sub">This 54-question assessment reveals which of the nine spiritual temperaments best describes your natural way of connecting with God. Score each statement honestly — there are no right answers.</p>
+    <button class="btn-primary" onclick="startAssessment()">Begin the assessment</button>
+    <p class="intro-meta">54 questions · about 5 minutes</p>
+  </div>
+
+  <div id="question-screen" class="screen">
+    <div class="progress-row">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progress-text">1 of 54</span>
+    </div>
+    <div class="pathway-badge" id="pathway-badge"></div>
+    <p class="question-number" id="q-number"></p>
+    <p class="question-text" id="q-text"></p>
+    <div class="scale-label-row">
+      <span>Not true at all</span>
+      <span>Very true</span>
+    </div>
+    <div class="rating-row" id="rating-row"></div>
+    <div class="nav-row">
+      <button class="btn-ghost" id="btn-back" onclick="goBack()">Back</button>
+      <button class="btn-next" id="btn-next" onclick="goNext()">Continue</button>
+    </div>
+  </div>
+
+  <div id="results-screen" class="screen">
+    <h2 class="results-title">Your sacred pathways</h2>
+    <p class="results-sub" id="results-intro"></p>
+    <div class="top-pathway-card" id="top-card"></div>
+    <div id="secondary-section"></div>
+    <p class="chart-section-title">All nine pathways</p>
+    <div id="bars-container"></div>
+    <p class="threshold-note">Scores of 15 or above indicate a strong tendency toward that pathway. Most people resonate with more than one. For deeper exploration, read <em>Sacred Pathways</em> by Gary Thomas.</p>
+    <div class="results-actions">
+      <button class="btn-retake" onclick="retake()">Retake the assessment</button>
+      <button class="btn-print" onclick="window.print()">Print results</button>
+    </div>
+
+    <div class="share-section">
+      <p class="share-title">Share Your Results</p>
+      <a href="#" id="share-leader-btn" class="share-btn" onclick="sendToLeader(event)">Send to Leader/Pastor</a>
+      <div class="share-divider">or</div>
+      <div class="share-custom">
+        <input type="email" id="share-email-input" class="share-input" placeholder="Enter email address">
+        <button class="share-send-btn" onclick="sendToCustomEmail()">Send Results</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PATHWAYS = [
+  {
+    key: 'nature', name: 'Naturalist', color: '#1baf7a',
+    tagline: 'Drawing near to God through creation',
+    description: 'You encounter God most powerfully in the outdoors — mountains, forests, rivers. Nature is your sanctuary, and time outside replenishes your soul in ways that indoor worship rarely can. For you, creation is not a backdrop to worship; it is worship.',
+    questions: [
+      "I feel closest to God when I'm surrounded by what He has made — the mountains, the forests or the ocean.",
+      "I feel cut off if I have to spend too much time indoors, just listening to speakers or singing songs. Nothing makes me feel closer to God than being outside.",
+      "I would rather worship God by spending an hour beside a small brook than by participating in a group service.",
+      "If I could escape to a garden to pray on a cold day, walk through a meadow on a warm day and take a trip by myself to the mountains on another day, I would be very happy.",
+      "A book called Nature's Sanctuaries: A Picture Book would be appealing to me.",
+      "Seeing God's beauty in nature is more moving to me than understanding new concepts, participating in a formal religious service or participating in social causes."
+    ]
+  },
+  {
+    key: 'senses', name: 'Sensate', color: '#e34948',
+    tagline: 'Drawing near to God through the senses',
+    description: 'Beauty awakens your worship. You connect with God when your senses come alive — through art, music, architecture, and liturgy that stirs awe. Second-rate worship creates distance for you, while excellence and beauty draw you into God\'s presence.',
+    questions: [
+      "I feel closest to God when I'm in a church service that allows my senses to come alive — when I can see, smell, hear and almost taste His majesty.",
+      "I enjoy attending a 'high church' service with a formal communion.",
+      "I'd have a difficult time worshiping in a church building that is plain and lacks a sense of awe or majesty. Beauty is very important to me.",
+      "The words sensuous, colorful and aromatic are very appealing to me.",
+      "I'm naturally drawn to museums and concerts more than I'm inclined to take a walk in the woods, work in a soup kitchen or read a book by myself.",
+      "I would really enjoy drawing exercises or classical music playing in the background to improve my prayer life."
+    ]
+  },
+  {
+    key: 'traditions', name: 'Traditionalist', color: '#eda100',
+    tagline: 'Drawing near to God through ritual and symbol',
+    description: 'Ritual, history, and sacred routine anchor your faith. Familiar forms of worship carry weight and memory. You find that symbols, liturgy, and structured devotion create a meaningful and reliable bridge to God across every season of life.',
+    questions: [
+      "I feel closest to God when I'm participating in a familiar form of worship that has memories dating back to my childhood. Rituals and traditions move me more than anything else.",
+      "I begin to feel closest to God when I am symbolically sacrificing for God.",
+      "The words 'tradition' and 'history' are very appealing to me.",
+      "Participating in a formal liturgy or 'prayer book' service, developing symbols that I can place in my car, home or office, and developing a Christian calendar for our family to follow are activities I would enjoy.",
+      "A book about Liturgy would be appealing to me.",
+      "I would really enjoy developing a personal rule (or ritual) of prayer."
+    ]
+  },
+  {
+    key: 'activist', name: 'Activist', color: '#eb6834',
+    tagline: 'Drawing near to God through justice and action',
+    description: 'You encounter God most powerfully when standing against injustice. Apathy frustrates you deeply. You feel spiritually alive when the church engages the world — writing, speaking, organizing, confronting what is wrong in the name of what is right.',
+    questions: [
+      "I feel closest to God when I am cooperating with Him in standing up for His justice: writing letters to government officials, picketing at a place of injustice, or urging people to vote.",
+      "I get very frustrated if I see apathetic Christians who don't become active. I want to help the church overcome its apathy.",
+      "The terms 'courageous confrontation' and 'social activism' are very appealing to me.",
+      "Activities such as confronting a social evil, attending a school board meeting to challenge curriculum and volunteering on a political campaign are important to me.",
+      "The book Fighting Modern Day Slavery would be appealing to me.",
+      "I would rather stand in the rain for an hour to confront an evil than sit in a room by myself for an hour and pray, take a walk through the woods or spend an hour reading a book."
+    ]
+  },
+  {
+    key: 'solitude', name: 'Ascetic', color: '#4a3aa7',
+    tagline: 'Drawing near to God through solitude and simplicity',
+    description: 'Silence and solitude are your sacred space. You are drawn inward, and your faith is deeply personal and disciplined. Noise and distraction pull you away from God; stillness restores you to Him. Simplicity is not deprivation — it is freedom.',
+    questions: [
+      "I feel closest to God when I am alone and there is nothing to distract me from focusing on His presence.",
+      "I would describe my faith as more 'internal' than 'external.'",
+      "The words 'silence,' 'solitude' and 'discipline' are very appealing to me.",
+      "Taking an overnight retreat by myself at a monastery where I could spend large amounts of time alone in a small room praying, studying God's Word and fasting for one or more days are all activities I would enjoy.",
+      "I would enjoy reading a book about Silence and Prayer.",
+      "I would really enjoy spending time on a night watch, taking a short vow of silence or simplifying my life."
+    ]
+  },
+  {
+    key: 'caregiver', name: 'Caregiver', color: '#2a78d6',
+    tagline: 'Drawing near to God through serving others',
+    description: 'You meet God in the face of those who need help. Caring for the sick, the poor, and the lonely is not merely service — it is worship. You feel most spiritually alive when love takes the form of action, and you sense God\'s presence most strongly while helping others.',
+    questions: [
+      "I feel closest to God when I see Him in the needy, the poor, the sick and the imprisoned. I feel God's presence most strongly when sitting with someone who is lonely or ill.",
+      "I grow weary of Christians who spend their time singing songs while a sick neighbor goes without a hot meal or a family in need doesn't get help.",
+      "The words 'service' and 'compassion' are very appealing to me.",
+      "I sense God's power when I am counseling a friend who has lost a job, preparing meals for a family in need, or spending a week at an orphanage.",
+      "A book titled '99 Ways to Help Your Neighbor' would be very appealing to me.",
+      "I would rather nurse someone to health or help repair someone's house than teach an adult Sunday school class, go on a prayer and fasting retreat or take a lonely walk in the woods."
+    ]
+  },
+  {
+    key: 'enthusiast', name: 'Enthusiast', color: '#c2185b',
+    tagline: 'Drawing near to God through celebration',
+    description: 'Your heart soars in worship. You love God with joyful exuberance and expect Him to move in unexpected ways. Celebration, spontaneity, and the mystery of the Spirit fuel your spiritual life. You find it hard to understand Christians who seem unmoved by a God this good.',
+    questions: [
+      "I feel closest to God when my heart is sent soaring and I feel like I want to burst, worship God all day long and shout out His name. Celebrating God and His love is my favorite form of worship.",
+      "God is an exciting God, and we should be excited about worshiping Him. I don't understand how some Christians can say they love God, and then act like they're going to a funeral when they walk into church.",
+      "The words 'celebration' and 'joy' are very appealing to me.",
+      "I would enjoy attending a workshop on learning to worship through dance or a worship session with contemporary music. I expect that God is going to move in unexpected ways.",
+      "I would enjoy reading the book The Mystery and Excitement of Walking With God.",
+      "I spend more money on music and worship downloads than on books."
+    ]
+  },
+  {
+    key: 'contemplative', name: 'Contemplative', color: '#7b1fa2',
+    tagline: 'Drawing near to God through adoration',
+    description: 'You are drawn into deep, quiet intimacy with God. Your greatest longing is simply to be near Him — to feel His love and rest in His presence. Friendship with God is the center of your spiritual life, and you are most at home when nothing separates you from Him.',
+    questions: [
+      "I feel closest to God when my emotions are awakened, when God quietly touches my heart, tells me that He loves me and makes me feel like I'm His closest friend.",
+      "The most difficult times for me are when I can't feel God's presence within me.",
+      "The words 'lover,' 'intimacy' and 'heart' are very appealing to me.",
+      "I really enjoy having 30 minutes of uninterrupted time each day to sit in quiet prayer and 'hold hands' with God, writing love letters to Him and enjoying His presence.",
+      "I would enjoy reading The Transforming Friendship.",
+      "When I think of God, I think of love, friendship and adoration more than anything."
+    ]
+  },
+  {
+    key: 'intellectual', name: 'Intellectual', color: '#2e7d32',
+    tagline: 'Drawing near to God through the mind',
+    description: 'Your mind is your primary avenue to God. You grow spiritually when you understand — through study, sound doctrine, and careful thinking. You need to know what you believe and why, and teaching or discussing ideas with others energizes your faith.',
+    questions: [
+      "I feel closer to God when I learn something new about Him that I didn't understand before. My mind needs to be stimulated. It's very important to me that I know exactly what I believe.",
+      "I get frustrated when the church focuses too much on feelings and spiritual experience. Of far more importance is the need to understand the Christian faith and to have proper doctrine.",
+      "The words 'concepts' and 'truth' are very appealing to me.",
+      "I feel close to God when I participate in several hours of uninterrupted study time, reading God's Word or good Christian books and then perhaps having an opportunity to teach or discuss with a small group.",
+      "A book on church history would be appealing to me.",
+      "I spend more money on books than music."
+    ]
+  }
+];
+
+let answers = {};
+let currentIdx = 0;
+
+const allQuestions = [];
+PATHWAYS.forEach((p) => {
+  p.questions.forEach((q, qi) => {
+    allQuestions.push({
+      pathway: p.key,
+      pathwayName: p.name,
+      pathwayColor: p.color,
+      text: q,
+      id: `${p.key}-${qi}`
+    });
+  });
+});
+
+function startAssessment() {
+  answers = {};
+  currentIdx = 0;
+  showQuestion();
+  document.getElementById('intro').classList.remove('active');
+  document.getElementById('question-screen').classList.add('active');
+}
+
+function showQuestion() {
+  const q = allQuestions[currentIdx];
+  const total = allQuestions.length;
+  const pct = Math.round((currentIdx / total) * 100);
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = (currentIdx + 1) + ' of ' + total;
+  document.getElementById('pathway-badge').textContent = q.pathwayName;
+  document.getElementById('q-number').textContent = 'Question ' + ((currentIdx % 6) + 1) + ' of 6';
+  document.getElementById('q-text').textContent = q.text;
+
+  const row = document.getElementById('rating-row');
+  row.innerHTML = '';
+  for (let v = 1; v <= 5; v++) {
+    const btn = document.createElement('button');
+    btn.className = 'rating-btn' + (answers[q.id] === v ? ' selected' : '');
+    btn.textContent = v;
+    const val = v;
+    btn.onclick = () => selectRating(val);
+    row.appendChild(btn);
+  }
+
+  const nextBtn = document.getElementById('btn-next');
+  const isLast = currentIdx === total - 1;
+  nextBtn.textContent = isLast ? 'See my results' : 'Continue';
+  if (answers[q.id]) {
+    nextBtn.classList.add('enabled');
+  } else {
+    nextBtn.classList.remove('enabled');
+  }
+
+  document.getElementById('btn-back').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+}
+
+function selectRating(v) {
+  const q = allQuestions[currentIdx];
+  answers[q.id] = v;
+  document.querySelectorAll('.rating-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i + 1 === v);
+  });
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.classList.add('enabled');
+  nextBtn.textContent = currentIdx === allQuestions.length - 1 ? 'See my results' : 'Continue';
+}
+
+function goNext() {
+  const q = allQuestions[currentIdx];
+  if (!answers[q.id]) return;
+  if (currentIdx < allQuestions.length - 1) {
+    currentIdx++;
+    showQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResults();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goBack() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    showQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function computeScores() {
+  const scores = {};
+  PATHWAYS.forEach(p => {
+    scores[p.key] = p.questions.reduce((sum, _, i) => {
+      return sum + (answers[p.key + '-' + i] || 0);
+    }, 0);
+  });
+  return scores;
+}
+
+function showResults() {
+  const scores = computeScores();
+  const sorted = PATHWAYS.map(p => Object.assign({}, p, { score: scores[p.key] }))
+    .sort((a, b) => b.score - a.score);
+
+  const top = sorted[0];
+  const highs = sorted.filter(p => p.score >= 15);
+  const secondaries = highs.filter(p => p.key !== top.key);
+
+  document.getElementById('results-intro').textContent =
+    highs.length > 1
+      ? 'Your results reveal ' + highs.length + ' strong pathways — any score of 15 or above reflects a genuine spiritual temperament.'
+      : 'Your results point to a clear primary pathway. Secondary pathways may also shape how you worship across different seasons.';
+
+  document.getElementById('top-card').innerHTML =
+    '<div class="top-pathway-label" style="color:' + top.color + '">Primary pathway</div>' +
+    '<div class="top-pathway-name">' + top.name + ' <span style="font-size:15px;font-weight:400;color:var(--text-muted)">' + top.score + '/30</span></div>' +
+    '<div class="top-pathway-tagline">' + top.tagline + '</div>' +
+    '<div class="top-pathway-desc">' + top.description + '</div>';
+
+  const secSection = document.getElementById('secondary-section');
+  if (secondaries.length > 0) {
+    let html = '<p class="chart-section-title" style="margin-bottom:0.75rem">Secondary pathways</p><div class="secondary-cards">';
+    secondaries.forEach(p => {
+      html += '<div class="secondary-card" style="border-left: 3px solid ' + p.color + '">' +
+        '<div class="secondary-card-name">' + p.name + '</div>' +
+        '<div class="secondary-card-score">' + p.score + '/30 · ' + p.tagline + '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+    secSection.innerHTML = html;
+  } else {
+    secSection.innerHTML = '';
+  }
+
+  const container = document.getElementById('bars-container');
+  container.innerHTML = '';
+  sorted.forEach(p => {
+    const pct = Math.round((p.score / 30) * 100);
+    const row = document.createElement('div');
+    row.className = 'pathway-bar-row';
+    row.innerHTML =
+      '<span class="pathway-bar-label">' + p.name + '</span>' +
+      '<div class="pathway-bar-track"><div class="pathway-bar-fill" style="width:0%;background:' + p.color + '" data-width="' + pct + '%"></div></div>' +
+      '<span class="pathway-bar-score">' + p.score + '</span>';
+    container.appendChild(row);
+  });
+
+  document.getElementById('question-screen').classList.remove('active');
+  document.getElementById('results-screen').classList.add('active');
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.pathway-bar-fill').forEach(el => {
+        el.style.width = el.dataset.width;
+      });
+    });
+  });
+}
+
+function retake() {
+  answers = {};
+  currentIdx = 0;
+  document.getElementById('results-screen').classList.remove('active');
+  document.getElementById('intro').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Email sharing functionality
+const LEADER_EMAIL = 'REPLACE_WITH_EMAIL@example.com';
+
+function generateEmailContent() {
+  const scores = computeScores();
+  const sorted = PATHWAYS.map(p => Object.assign({}, p, { score: scores[p.key] }))
+    .sort((a, b) => b.score - a.score);
+
+  const top3 = sorted.slice(0, 3);
+  const primary = top3[0];
+
+  let body = 'My Sacred Pathways Assessment Results\n';
+  body += '======================================\n\n';
+  body += 'TOP 3 PATHWAYS:\n\n';
+
+  top3.forEach((p, i) => {
+    const rank = i === 0 ? 'Primary' : (i === 1 ? '2nd' : '3rd');
+    body += `${rank}: ${p.name} - ${p.score}/30\n`;
+  });
+
+  body += '\n--------------------------------------\n\n';
+  body += `ABOUT MY PRIMARY PATHWAY: ${primary.name}\n`;
+  body += `"${primary.tagline}"\n\n`;
+  body += primary.description + '\n\n';
+  body += '--------------------------------------\n\n';
+  body += 'Take the assessment yourself:\n';
+  body += window.location.href + '\n';
+
+  return body;
+}
+
+function sendToLeader(event) {
+  event.preventDefault();
+  const subject = encodeURIComponent('My Sacred Pathways Assessment Results');
+  const body = encodeURIComponent(generateEmailContent());
+  window.location.href = `mailto:${LEADER_EMAIL}?subject=${subject}&body=${body}`;
+}
+
+function sendToCustomEmail() {
+  const emailInput = document.getElementById('share-email-input');
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    emailInput.focus();
+    return;
+  }
+
+  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    alert('Please enter a valid email address.');
+    emailInput.focus();
+    return;
+  }
+
+  const subject = encodeURIComponent('My Sacred Pathways Assessment Results');
+  const body = encodeURIComponent(generateEmailContent());
+  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+</script>
+</body>
+</html>
