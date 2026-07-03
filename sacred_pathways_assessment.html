@@ -496,6 +496,83 @@
     transition: opacity 0.15s;
   }
   .share-send-btn:hover { opacity: 0.88; }
+  .share-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .submit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .name-option {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .anonymous-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .anonymous-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .submit-btn {
+    align-self: flex-start;
+  }
+
+  .submit-status {
+    font-size: 13px;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: var(--radius);
+    display: none;
+  }
+
+  .submit-status.success {
+    display: block;
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .submit-status.error {
+    display: block;
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  .submit-status.loading {
+    display: block;
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    border: 1px solid var(--accent-border);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .submit-status.success {
+      background: #1e392a;
+      color: #75d99a;
+      border-color: #2d5a3d;
+    }
+    .submit-status.error {
+      background: #3d1f23;
+      color: #f5a3ab;
+      border-color: #5c2d33;
+    }
+  }
 
   /* Secondary pathways */
   .secondary-cards {
@@ -603,12 +680,17 @@
     </div>
 
     <div class="share-section">
-      <p class="share-title">Share Your Results</p>
-      <a href="#" id="share-leader-btn" class="share-btn" onclick="sendToLeader(event)">Send to Leader/Pastor</a>
-      <div class="share-divider">or</div>
-      <div class="share-custom">
-        <input type="email" id="share-email-input" class="share-input" placeholder="Enter email address">
-        <button class="share-send-btn" onclick="sendToCustomEmail()">Send Results</button>
+      <p class="share-title">Submit to Cedarhills Church</p>
+      <div class="submit-form">
+        <div class="name-option">
+          <input type="text" id="submit-name-input" class="share-input" placeholder="Your name (optional)">
+          <label class="anonymous-label">
+            <input type="checkbox" id="anonymous-checkbox" onchange="toggleAnonymous()">
+            <span>Submit anonymously</span>
+          </label>
+        </div>
+        <button class="share-send-btn submit-btn" id="submit-btn" onclick="submitToCedarhills()">Submit Results</button>
+        <p class="submit-status" id="submit-status"></p>
       </div>
     </div>
   </div>
@@ -904,62 +986,93 @@ function retake() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Email sharing functionality
-const LEADER_EMAIL = 'REPLACE_WITH_EMAIL@example.com';
+// Google Sheets submission
+// IMPORTANT: Replace this URL with your deployed Google Apps Script Web App URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQnr94DMvkfNLcvwTDRlmYsKjQhzOw7RVwpOHreriLnwYeP7gTv2tMpCkC935KnVE/exec';
 
-function generateEmailContent() {
+function toggleAnonymous() {
+  const checkbox = document.getElementById('anonymous-checkbox');
+  const nameInput = document.getElementById('submit-name-input');
+  if (checkbox.checked) {
+    nameInput.value = '';
+    nameInput.disabled = true;
+    nameInput.placeholder = 'Submitting anonymously';
+  } else {
+    nameInput.disabled = false;
+    nameInput.placeholder = 'Your name (optional)';
+  }
+}
+
+function prepareSubmissionData() {
   const scores = computeScores();
   const sorted = PATHWAYS.map(p => Object.assign({}, p, { score: scores[p.key] }))
     .sort((a, b) => b.score - a.score);
 
-  const top3 = sorted.slice(0, 3);
-  const primary = top3[0];
+  const top5 = sorted.slice(0, 5).map(p => ({
+    name: p.name,
+    score: p.score
+  }));
 
-  let body = 'My Sacred Pathways Assessment Results\n';
-  body += '======================================\n\n';
-  body += 'TOP 3 PATHWAYS:\n\n';
+  const allScores = {
+    naturalist: scores.nature,
+    sensate: scores.senses,
+    traditionalist: scores.traditions,
+    activist: scores.activist,
+    ascetic: scores.solitude,
+    caregiver: scores.caregiver,
+    enthusiast: scores.enthusiast,
+    contemplative: scores.contemplative,
+    intellectual: scores.intellectual
+  };
 
-  top3.forEach((p, i) => {
-    const rank = i === 0 ? 'Primary' : (i === 1 ? '2nd' : '3rd');
-    body += `${rank}: ${p.name} - ${p.score}/30\n`;
-  });
+  const isAnonymous = document.getElementById('anonymous-checkbox').checked;
+  const nameInput = document.getElementById('submit-name-input').value.trim();
+  const name = isAnonymous ? 'Anonymous' : (nameInput || 'Anonymous');
 
-  body += '\n--------------------------------------\n\n';
-  body += `ABOUT MY PRIMARY PATHWAY: ${primary.name}\n`;
-  body += `"${primary.tagline}"\n\n`;
-  body += primary.description + '\n\n';
-  body += '--------------------------------------\n\n';
-  body += 'Take the assessment yourself:\n';
-  body += window.location.href + '\n';
-
-  return body;
+  return { name, top5, allScores };
 }
 
-function sendToLeader(event) {
-  event.preventDefault();
-  const subject = encodeURIComponent('My Sacred Pathways Assessment Results');
-  const body = encodeURIComponent(generateEmailContent());
-  window.location.href = `mailto:${LEADER_EMAIL}?subject=${subject}&body=${body}`;
-}
+async function submitToCedarhills() {
+  const statusEl = document.getElementById('submit-status');
+  const submitBtn = document.getElementById('submit-btn');
 
-function sendToCustomEmail() {
-  const emailInput = document.getElementById('share-email-input');
-  const email = emailInput.value.trim();
-
-  if (!email) {
-    emailInput.focus();
+  // Check if URL is configured
+  if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    statusEl.textContent = 'Configuration needed: Please deploy the Google Apps Script and update the URL.';
+    statusEl.className = 'submit-status error';
     return;
   }
 
-  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-    alert('Please enter a valid email address.');
-    emailInput.focus();
-    return;
-  }
+  // Show loading state
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  statusEl.textContent = 'Sending your results to Cedarhills Church...';
+  statusEl.className = 'submit-status loading';
 
-  const subject = encodeURIComponent('My Sacred Pathways Assessment Results');
-  const body = encodeURIComponent(generateEmailContent());
-  window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  try {
+    const data = prepareSubmissionData();
+
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Required for Google Apps Script
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
+
+    // With no-cors, we can't read the response, so assume success
+    statusEl.textContent = 'Your results have been submitted to Cedarhills Church. Thank you!';
+    statusEl.className = 'submit-status success';
+    submitBtn.textContent = 'Submitted!';
+
+  } catch (error) {
+    statusEl.textContent = 'There was an error submitting your results. Please try again.';
+    statusEl.className = 'submit-status error';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Results';
+    console.error('Submission error:', error);
+  }
 }
 </script>
 </body>
